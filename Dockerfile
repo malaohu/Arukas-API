@@ -4,6 +4,6 @@ WORKDIR /app/views
 WORKDIR /app/public
 COPY server.js /app/
 COPY package.json /app/
-COPY index.html /app/views
-COPY css.css /app/public
+COPY views/index.html /app/views
+COPY public/css.css /app/public
 RUN npm install
