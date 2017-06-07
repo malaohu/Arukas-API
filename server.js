@@ -2,6 +2,7 @@ var express = require('express');
 var superagent = require('superagent');
 var async = require('async');
 var ejs = require('ejs');
+var cronJob = require("cron").CronJob; 
 
 var app = express();
 app.use(express.static(__dirname + '/public'));
@@ -9,17 +10,21 @@ app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 var args = process.argv.slice(2);
-var token = '', secret = '';
+var token = '', secret = '',is_cron;
 
 
 token = args[0];
 secret = args[1];
+is_cron = args[3] || 0;
 
+//兼容旧版本
+appid = args[2] || 'all';
+if (appid == 0 || appid ==1){
+    is_cron = appid;
+    appid = 'all';
+}
 
-
-appid = args[2] || 'all',
-images = ["malaohu/ssr-with-net-speeder", "malaohu/ss-with-net-speeder", "lowid/ss-with-net-speeder"];
-
+var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?$/i
 
 app.get('/', function (req, res) {
     getit(appid, function (err, data) {
@@ -29,6 +34,55 @@ app.get('/', function (req, res) {
             res.render('./index.html', { "data": data || [] });
     })
 });
+
+app.get('/:appid', function (req, res) {
+    var _appid = req.params.appid;
+    get_app_info(_appid, function (err, data) {
+        if (!err)
+            return get_ss_data(appid, [data], function (err, data) {
+                res.send(data);
+            });
+        else
+            res.send('can not find app_id!');
+    })
+})
+
+//检查所有APP的状态，发现启动失败的，发送启动命令。
+app.get('/check/status', function (req, res) {
+    check_status(function(log){
+        res.send('<pre><code>' +log.join('<br>')+'</code></pre>');
+    })
+});
+
+
+//获取SSR订阅地址
+//4.4.0+ 版本
+//说明文档：https://github.com/breakwa11/shadowsocks-rss/wiki/Subscribe-%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AE%A2%E9%98%85%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3
+app.get('/ssr/subscribe/:max',function(req,res){
+    var max = parseInt(req.params.max);
+    getit('all',function(e,data){
+        res_arr = [];
+        if (max > 0)
+            res_arr.push('MAX=' + max);
+        console.log(data);
+        for(var i = 0; i < data.length; i++)
+            if(data[i].protocol)
+                res_arr.push(build_ssh(data[i]))
+            console.log(res_arr);
+        res.send(new Buffer(res_arr.join('\n')).toString('base64'))
+    });
+});
+
+
+//启动服务监控每60秒执行一次
+if (is_cron == 1){
+    new cronJob('*/60 * * * * *', function () { 
+        check_status(function(log){
+            console.log(log);
+        });
+    }, null, true, 'Asia/Chongqing');
+    console.log('启动服务监控');
+}
 
 function getit(appid, callback) {
     if (appid != 'all')
@@ -113,7 +167,7 @@ function send_start_command(appid, callback) {
 function get_ss_data(_appid, data, callback) {
     var ret_list = [];
     for (var i = 0; i < data.length; i++) {
-        if (data[i].id == _appid || (_appid == 'all' && images.indexOf(data[i].attributes.image_name.replace(/:[^ ]+/, '')) > -1)) {
+        if (data[i].id == _appid || (_appid == 'all' && reg_images.test(data[i].attributes.image_name))) {
             var jn = data[i];
             if (!jn.attributes.port_mappings)
                 continue;
@@ -153,24 +207,25 @@ function get_ss_data(_appid, data, callback) {
     return callback(null, ret_list);
 }
 
-app.get('/:appid', function (req, res) {
-    var _appid = req.params.appid;
-    get_app_info(_appid, function (err, data) {
-        if (!err)
-            return get_ss_data(appid, [data], function (err, data) {
-                res.send(data);
-            });
-        else
-            res.send('can not find app_id!');
-    })
-})
+//创建SSR的ssh链接
+function build_ssh(obj){
+    var group_name = 'Arukas-SSR';
+    var group_name_base64 = 'QXJ1a2FzLVNTUg';
+    var remark = 'RUYO.net';
+    var remark_base64 = 'UlVZTy5uZXQ';
+    console.log(obj);
+    
+    if(!obj)
+        return null
+    var pwd_base64 = new Buffer(obj.password).toString('base64');
+    return 'ssr://' + obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64
+         + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64;
+}
 
-//检查所有APP的状态，发现启动失败的，发送启动命令。
-app.get('/check/status', function (req, res) {
+function check_status(callback){
     get_all_app_info(function (err, data) {
         var log = ['开始检查APP运行情况 : ' + new Date()];
-
-        async.eachSeries(data, function (_data, callback) {
+        async.eachSeries(data, function (_data, cb) {
             if (!_data.attributes.is_running) {
                 log.push('');
                 log.push('[' + _data.id + '] - 没有正常运行');
@@ -179,23 +234,21 @@ app.get('/check/status', function (req, res) {
                         log.push('[' + _data.id + '] - 启动失败：' + err);
                     else
                         log.push('[' + _data.id + '] - 启动成功');
-                    callback(null);
+                    cb(null);
 
                 });
 
             } else
-                callback(null);
-        }, function (err, result) {
-            res.send(log.join('<br>'));
+                cb(null);
+        }, 
+        function (err, result) {
+            callback(log);     
         })
-    });
+    })
+}
 
-});
 
-app.get('/i', function (req, res) {
-    res.send('http://51.ruyo.net');
-})
 
-app.listen(3999, function () {
+app.listen(13999, function () {
     console.log('Example app listening on port 3999')
 })

@@ -12,6 +12,7 @@
     "express": "4.*",
     "ejs": "*",
     "superagent":"*",
-	"async":"*"
+	"async":"*",
+	"cron":"*"
   }
 }
