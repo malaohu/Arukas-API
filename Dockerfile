@@ -13,4 +13,4 @@ ENV SECRET
 WORKDIR /Arukas-API
 RUN npm install
 
-CMD node /app/server.js $TOKEN $SECRET $IS_CRON 
+CMD node /Arukas-API/server.js $TOKEN $SECRET $IS_CRON 
