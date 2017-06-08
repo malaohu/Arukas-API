@@ -36,9 +36,9 @@
 
 						<div class="pure-u-1 u-sm-1-2">
                         <% if(data[i].protocol && data[i].obfs){%>
-                        <div class="ssr_qr" id="<%=data[i].appid%>" val='<%=data[i].server + ":" + data[i].server_port +":" + data[i].protocol+ ":"+data[i].method +":"+data[i].obfs+ ":"%>' pwd='<%=data[i].password%>'  style="width:350px; height:350px;"></div>
+                        <div class="ssr_qr" id="<%=data[i].appid%>"  val='<%=data[i].server + ":" + data[i].server_port + ":" + data[i].protocol + ":" + data[i].method + ":" + data[i].obfs + ":" + data[i].password + "/?obfsparam=&remarks=" + data[i].remarks + "&group=" + data[i].group %>' style="width:350px; height:350px;"></div>
                         <%}else{%>
-                        <div class="ss_qr" id="<%=data[i].appid%>"  val='<%=data[i].method + ":" + data[i].password + "@" + data[i].server + ":" + data[i].server_port%>' style="width:350px; height:350px;"></div>
+                        <div class="ss_qr" id="<%=data[i].appid%>" val='<%=data[i].method + ":" + data[i].password + "@" + data[i].server + ":" + data[i].server_port%>' style="width:350px; height:350px;"></div>
                         <%}%>
                         </div>
                     </div>                    
