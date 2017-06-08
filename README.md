@@ -42,7 +42,7 @@ docker run -d --name arukas-api -p 13999:13999 malaohu/arukas-api --env TOKEN=to
 CMD : node /app/server.js token secret 1
 ```
 
-# 环境变量(ENV)
+## 环境变量(ENV)
 TOKEN 和  SECRET 获取地址：https://app.arukas.io/settings/api-keys
 
 
@@ -51,13 +51,16 @@ IS_CRON 传 0 或者 1
 该服务会定时检测APP运行状态，如果APP没有启动，会发送一个启动命令。
 
 
-# 功能介绍
+## 功能介绍
 * 实时获取IP和端口，以及SS(R)的配置信息
 * 检查APP运行情况，没有启动的发送启动命令(支持手动请求)
 
+## 请求地址
+http://ip:139999
+http://ip:139999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令
 
 
-# 可识别的SS(R)镜像
+## 可识别的SS(R)镜像
 
 */ssr-with-net-speeder
 
