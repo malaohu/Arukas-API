@@ -56,9 +56,9 @@ IS_CRON 传 0 或者 1
 * 检查APP运行情况，没有启动的发送启动命令(支持手动请求)
 
 ## 请求地址
-http://ip:139999
-http://ip:139999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令
-
+* http://ip:13999
+* http://ip:13999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令
+* http://ip:13999/ssr/subscribe/10 SSR订阅地址
 
 ## 可识别的SS(R)镜像
 
