@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "author": "malaohu",
   "license": "GPL-2.0",
-  "description": "一个Arukas.io常用API接口",
+  "description": "Arukas API For Test",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/malaohu/Arukas-API.git"

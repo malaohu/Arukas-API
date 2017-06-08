@@ -10,19 +10,19 @@ app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 var args = process.argv.slice(2);
-var token = '', secret = '',is_cron;
+var token = '', secret = '',is_croni,appid='all';
 
 
 token = args[0];
 secret = args[1];
-is_cron = args[3] || 0;
+is_cron = args[2] || 0;
 
 //兼容旧版本
-appid = args[2] || 'all';
+/*appid = args[2] || 'all';
 if (appid == 0 || appid ==1){
     is_cron = appid;
     appid = 'all';
-}
+}*/
 
 var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?$/i
 
@@ -250,5 +250,5 @@ function check_status(callback){
 
 
 app.listen(13999, function () {
-    console.log('Example app listening on port 3999')
+    console.log('Example app listening on port 13999')
 })
