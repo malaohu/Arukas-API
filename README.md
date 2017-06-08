@@ -21,7 +21,7 @@ SSR： https://github.com/malaohu/ssr-with-net-speeder
 git clone https://github.com/malaohu/Arukas-API
 cd Arukas-API
 npm install
-node server.js token secret all 1
+node server.js token secret 1
 ```
 然后访问：ip:13999 即可
 
@@ -30,28 +30,21 @@ node server.js token secret all 1
 ```
 镜像：malaohu/arukas-api
 端口:13999 TCP
-CMD : node /app/server.js token secret all 1
+CMD : node /app/server.js token secret 1
 ```
 
 # 参数说明
 
 详细说明一下CMD中的命令参数。
-
-使用密钥方式，访问速度会更快一些。像Github 第三方登录也可以使用。
+目前参数依次有3个 token secret is_cron
 
 token 和 secret 获取地址：
 
 https://app.arukas.io/settings/api-keys
 
 
-appid
-
-appid 参数可以不传，那么就是获取所有APPID且可识别镜像的信息。
-
-
-你建立的APP都有一个ID。例如：
-ID	fd9b708e-9a2c-45a0-b81c-620944369c2d
-
+is_cron 参数是，是否启动自动启动服务功能。
+该服务会定时检测APP运行状态，如果APP没有启动，会发送一个启动命令。
 
 
 ### 支持识别的镜像
