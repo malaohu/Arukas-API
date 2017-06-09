@@ -3,6 +3,9 @@ var superagent = require('superagent');
 var async = require('async');
 var ejs = require('ejs');
 var cronJob = require("cron").CronJob; 
+var cache = require('memory-cache');
+var config = require('./config');
+
 
 var app = express();
 app.use(express.static(__dirname + '/public'));
@@ -13,16 +16,15 @@ var args = process.argv.slice(2);
 var token = '', secret = '',is_croni,appid='all';
 
 
-token = args[0];
-secret = args[1];
-is_cron = args[2] || 0;
+//token = args[0];
+//secret = args[1];
+//is_cron = args[2] || 0;
 
-//兼容旧版本
-/*appid = args[2] || 'all';
-if (appid == 0 || appid ==1){
-    is_cron = appid;
-    appid = 'all';
-}*/
+token = config.token;
+secret = config.secret;
+is_cron = config.is_cron;
+is_cache = config.cache;
+cache_timeout = config.cache_timeout;
 
 var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?$/i
 
@@ -59,16 +61,15 @@ app.get('/check/status', function (req, res) {
 //4.4.0+ 版本
 //说明文档：https://github.com/breakwa11/shadowsocks-rss/wiki/Subscribe-%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AE%A2%E9%98%85%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3
 app.get('/ssr/subscribe/:max',function(req,res){
+    access_log(req);
     var max = parseInt(req.params.max);
     getit('all',function(e,data){
         res_arr = [];
         if (max > 0)
             res_arr.push('MAX=' + max);
-        console.log(data);
         for(var i = 0; i < data.length; i++)
             if(data[i].protocol)
                 res_arr.push(build_ssh(data[i]))
-            console.log(res_arr);
         res.send(new Buffer(res_arr.join('\n')).toString('base64'))
     });
 });
@@ -85,21 +86,12 @@ if (is_cron == 1){
 }
 
 function getit(appid, callback) {
-    if (appid != 'all')
-        get_app_info(function (err, data) {
-            if (!err)
-                return get_ss_data(appid, [data], callback);
-            else
-                return callback(err, null);
-        });
-    else
-        get_all_app_info(function (err, data) {
-            console.log(data);
-            if (!err)
-                return get_ss_data(appid, data, callback);
-            else
-                return callback(err, null);
-        });
+    get_all_app_info(function (err, data) {
+        if (!err)
+            return get_ss_data(appid, data, callback);
+        else
+            return callback(err, null);
+    });
 }
 
 //发送API请求
@@ -145,9 +137,24 @@ function getit_by_token(appid, callback) {
 }
 
 function get_all_app_info(callback) {
-    arukas_request("containers", "GET", function (err, body) {
-        return callback(err, body);
-    })
+    var _body = null;
+    if(is_cache)
+        _body = cache.get('all_app_info');
+    if(_body){
+        console.log('all_app_info get from cache');
+        return callback(null, _body);
+    }
+    else
+        arukas_request("containers", "GET", function (err, body) {
+            //做缓存处理
+            if(!err && is_cache){
+                cache.put('all_app_info', body, cache_timeout, function(key, value) {
+                    console.log('put cache key: ['+ key + '] value:' + value);
+                });
+            }
+            console.log('all_app_info get from api');
+            return callback(err, body);
+        })
 }
 
 function get_app_info(app_id, callback) {
@@ -173,7 +180,7 @@ function get_ss_data(_appid, data, callback) {
         if (data[i].id == _appid || (_appid == 'all' && reg_images.test(data[i].attributes.image_name))) {
             var jn = data[i];
             if (!jn.attributes.port_mappings)
-                continue;
+                ontinue;
             for (var j = 0; j < jn.attributes.port_mappings.length; j++) {
                 var host = jn.attributes.port_mappings[j][0].host;
                 var ip = host.substring(6, host.indexOf(".")).replace(/-/g, ".");
@@ -236,7 +243,6 @@ function check_status(callback){
                     else
                         log.push('[' + _data.id + '] - 启动成功');
                     cb(null);
-
                 });
 
             } else
@@ -248,7 +254,20 @@ function check_status(callback){
     })
 }
 
-
+function access_log(req)
+{
+    var getClientIP = function(){
+        var ipAddress;
+        var headers = req.headers;
+        var forwardedIpsStr = headers['x-real-ip'] || headers['x-forwarded-for'];
+        forwardedIpsStr ? ipAddress = forwardedIpsStr : ipAddress = null;
+        if (!ipAddress){
+            ipAddress = req.connection.remoteAddress;
+        }
+        return ipAddress;
+    }
+    console.log(new Date() + ' ' + getClientIP() + ' ' + req.url);
+}
 
 app.listen(13999, function () {
     console.log('Example app listening on port 13999')
