@@ -200,7 +200,6 @@ function get_ss_data(_appid, data, callback) {
                         ret_json["password"] = Buffer(ss_password).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
                         ret_json["protocol"] = ss_protocol;
                         ret_json["obfs"] = ss_obfs;
-                        //ret_json["remarks"] = Buffer(data[i].id).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
                         ret_json["remarks"] = Buffer(data[i].attributes.arukas_domain).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
                         ret_json["group"] = Buffer("Arukas-SSR").toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
                     }else{
@@ -218,8 +217,8 @@ function get_ss_data(_appid, data, callback) {
 function build_ssh(obj){
     var group_name = 'Arukas-SSR';
     var group_name_base64 = 'QXJ1a2FzLVNTUg';
-    var remark = data[i].attributes.arukas_domain;
-    var remark_base64 = Buffer(data[i].attributes.arukas_domain).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+    var remark = 'RUYO.net';
+    var remark_base64 = 'UlVZTy5uZXQ';
     if(!obj)
         return null
     var pwd_base64 = new Buffer(obj.password).toString('base64');
