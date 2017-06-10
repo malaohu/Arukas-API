@@ -124,7 +124,10 @@ function arukas_request(commond_url, methond, callback) {
         .set('Content-Type', 'application/vnd.api+json')
         .set('Accept', 'application/vnd.api+json')
         .end(function (err, sres) {
-            return callback(err, sres.body.data);
+            if(err)
+                return callback(err,null);
+            else
+                return callback(err, sres.body.data);
         });
 }
 
