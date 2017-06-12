@@ -4,7 +4,7 @@ MAINTAINER malaohu <tua@live.cn>
 RUN apt-get clean all
 RUN apt-get update
 RUN apt-get -y install git
-RUN git clone https://github.com/snquentin/Arukas-API /Arukas-API
+RUN git clone https://github.com/snquentin/Arukas-API.git /Arukas-API
 
 ENV IS_CRON= 
 ENV TOKEN=
