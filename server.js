@@ -218,17 +218,29 @@ function get_ss_data(_appid, data, callback) {
 
 //创建SSR的ssh链接
 function build_ssh(obj){
-    //var group_name = 'Arukas-SSR';
-    //var group_name_base64 = 'QXJ1a2FzLVNTUg';
-    //var remark = 'RUYO.net';
-    //var remark_base64 = 'UlVZTy5uZXQ';
+    var group_name = 'Arukas-SSR';
+    var group_name_base64 = 'QXJ1a2FzLVNTUg';
+    var remark = 'RUYO.net';
+    var remark_base64 = 'UlVZTy5uZXQ';
     if(!obj)
         return null
-    //var pwd_base64 = new Buffer(obj.password).toString('base64');
-	//var ssr_add = obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group;
-	//var ssr_add_base64 = new Buffer(ssr_add).toString('base64');
-    return 'ssr://' + Buffer(obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group).toString('base64');
-    //return 'ssr://' + ssr_add_base64;
+    var pwd_base64 = new Buffer(obj.password).toString('base64');
+	//2var ssr_add = obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group;
+	//2var ssr_add_base64 = new Buffer(ssr_add).toString('base64');
+    return 'ssr://' + obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64 + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64;
+    //2return 'ssr://' + ssr_add_base64;
+    //3return 'ssr://' + Buffer(obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group).toString('base64');
+}
+//创建SSR的ssh链接
+function build_ssh(obj){
+    var group_name = 'Arukas-SSR';
+    var group_name_base64 = 'QXJ1a2FzLVNTUg';
+    var remark = 'RUYO.net';
+    var remark_base64 = 'UlVZTy5uZXQ';
+    if(!obj)
+        return null
+    var pwd_base64 = new Buffer(obj.password).toString('base64');
+    return 'ssr://' + obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64 + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64;
 }
 
 function check_status(callback){
