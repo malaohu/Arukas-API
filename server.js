@@ -197,11 +197,17 @@ function get_ss_data(_appid, data, callback) {
                 if (/-o\s+([^ ]+)/.test(cmd))
                     ss_obfs = RegExp.$1;
                 if (ss_port == container_port) {
-                    var ret_json = { "appid": data[i].id, "server": ip, "server_port": service_port, "password": ss_password, "method": ss_method };
-                    if (ss_protocol && ss_obfs) {
+                    var ret_json = {"appid":data[i].id,"server":ip,"server_port":service_port,"method":ss_method};
+                    if(ss_protocol && ss_obfs)
+                    {
+                        ret_json["password"] = Buffer(ss_password).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
                         ret_json["protocol"] = ss_protocol;
                         ret_json["obfs"] = ss_obfs;
-                    }
+                        ret_json["remarks"] = Buffer(data[i].attributes.arukas_domain).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+                        ret_json["group"] = Buffer("Arukas-SSR").toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+                    }else{
+                        ret_json["password"] = ss_password;
+					}
                     ret_list.push(ret_json);
                 }
             }
@@ -212,15 +218,18 @@ function get_ss_data(_appid, data, callback) {
 
 //创建SSR的ssh链接
 function build_ssh(obj){
-    var group_name = 'Arukas-SSR';
-    var group_name_base64 = 'QXJ1a2FzLVNTUg';
-    var remark = 'RUYO.net';
-    var remark_base64 = 'UlVZTy5uZXQ';
+    //1var group_name = 'Arukas-SSR';
+    //1var group_name_base64 = 'QXJ1a2FzLVNTUg';
+    //1var remark = 'RUYO.net';
+    //1var remark_base64 = 'UlVZTy5uZXQ';
     if(!obj)
         return null
-    var pwd_base64 = new Buffer(obj.password).toString('base64');
-    return 'ssr://' + obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64
-         + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64;
+    //1var pwd_base64 = new Buffer(obj.password).toString('base64');
+	var ssr_add = obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group;
+	var ssr_add_base64 = new Buffer(ssr_add).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    //1return 'ssr://' + obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64 + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64;
+    return 'ssr://' + ssr_add_base64;
+    //3return 'ssr://' + Buffer(obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group).toString('base64');
 }
 
 function check_status(callback){
