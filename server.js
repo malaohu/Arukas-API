@@ -225,8 +225,10 @@ function build_ssh(obj){
     if(!obj)
         return null
     //var pwd_base64 = new Buffer(obj.password).toString('base64');
-    return 'ssr://' + btoa(obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password
-         + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group);
+	//var ssr_add = obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group;
+	//var ssr_add_base64 = new Buffer(ssr_add).toString('base64');
+    return 'ssr://' + Buffer(obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + obj.password + '/?obfsparam=&remarks=' + obj.remarks + '&group='+ obj.group).toString('base64');
+    //return 'ssr://' + ssr_add_base64;
 }
 
 function check_status(callback){
