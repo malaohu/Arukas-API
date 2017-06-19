@@ -12,6 +12,7 @@ SSR： https://github.com/malaohu/ssr-with-net-speeder
 
 演示地址：http://arukas.somecolor.cc/
 
+演示站点使用的账号已经被冻结无法使用。尽量自己使用，不要轻易分享给其他人。
 
 
 # 安装部署
