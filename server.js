@@ -64,20 +64,22 @@ app.get('/ssr/subscribe/:max',function(req,res){
     access_log(req);
     var max = parseInt(req.params.max);
     getit('all',function(e,data){
-        res_arr = [];
-        if (max > 0)
-            res_arr.push('MAX=' + max);
+        var res_arr = [],max_str;
         for(var i = 0; i < data.length; i++)
             if(data[i].protocol)
                 res_arr.push(build_ssh(data[i]))
-        res.send(new Buffer(res_arr.join('\n')).toString('base64'))
+        if(res_arr.length < max)
+            max_str = 'MAX=' + res_arr.length;
+        else
+            max_str = 'MAX=' + max;
+        res.send(bulid_base64(max_str + '\n' + res_arr.join('\n')))
     });
 });
 
 
-//启动服务监控每60秒执行一次
+//启动服务监控每5分钟执行一次
 if (is_cron == 1){
-    new cronJob('*/60 * * * * *', function () { 
+    new cronJob('*/5 * * * * *', function () { 
         check_status(function(log){
             console.log(log);
         });
@@ -225,9 +227,9 @@ function build_ssh(obj){
     var remark_base64 = 'UlVZTy5uZXQ';
     if(!obj)
         return null
-    var pwd_base64 = new Buffer(obj.password).toString('base64');
-    return 'ssr://' + obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64
-         + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64;
+    var pwd_base64 = bulid_base64(obj.password);
+    return 'ssr://' + bulid_base64(obj.server + ':' + obj.server_port + ':' + obj.protocol +':' + obj.method + ':' + obj.obfs + ':' + pwd_base64
+         + '/?obfsparam=&remarks=' + remark_base64 + '&group='+group_name_base64);
 }
 
 function check_status(callback){
@@ -267,6 +269,11 @@ function access_log(req)
         return ipAddress;
     }
     console.log(new Date() + ' ' + getClientIP() + ' ' + req.url);
+}
+
+function bulid_base64(str)
+{
+    return new Buffer(str).toString('base64').replace(/=+$/,'');
 }
 
 app.listen(13999, function () {
