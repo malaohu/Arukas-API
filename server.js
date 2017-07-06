@@ -79,7 +79,7 @@ app.get('/ssr/subscribe/:max',function(req,res){
 
 //启动服务监控每5分钟执行一次
 if (is_cron == 1){
-    new cronJob('*/5 * * * * *', function () { 
+    new cronJob('*/5 * * * *', function () { 
         check_status(function(log){
             console.log(log);
         });
