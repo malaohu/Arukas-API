@@ -1,7 +1,11 @@
 # 重要说明
+
 2017年7月6日提交的代码，不再支持 node server.js token secret 1 方式启动。
+
 需要修改config.js配置文件，填写 token 和 secret
+
 已经兼容到最新版本的SSR订阅格式
+
 
 # 特别说明
 
