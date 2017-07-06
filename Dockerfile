@@ -11,6 +11,12 @@ ENV TOKEN=
 ENV SECRET=
 
 WORKDIR /Arukas-API
+RUN sed -ri 's/yourtoken/'+$TOKEN+'/g' /Arukas-API/config.js && \
+    sed -ri 's/yoursecret/'+$SECRET+'/g' /Arukas-API/config.js && \
+    sed -ri 's/yourcron/'+$IS_CRON+'/g' /Arukas-API/config.js
+
 RUN npm install
+
 EXPOSE 13999
-CMD node /Arukas-API/server.js $TOKEN $SECRET $IS_CRON 
+
+CMD npm start
