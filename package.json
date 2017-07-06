@@ -4,6 +4,10 @@
   "author": "malaohu",
   "license": "GPL-2.0",
   "description": "Arukas API For Test",
+  "script":{
+    "start": "node ./server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/malaohu/Arukas-API.git"
@@ -13,6 +17,7 @@
     "ejs": "*",
     "superagent":"*",
 	"async":"*",
-	"cron":"*"
+	"cron":"*",
+    "memory-cache":"*"
   }
 }

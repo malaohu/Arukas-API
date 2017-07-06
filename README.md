@@ -1,4 +1,10 @@
-修正SSR C# 4.6.1不可用问题
+# 重要说明
+
+2017年7月6日提交的代码，不再支持 node server.js token secret 1 方式启动。
+
+需要修改config.js配置文件，填写 token 和 secret
+
+已经兼容到最新版本的SSR订阅格式
 
 # 特别说明
 
@@ -24,7 +30,8 @@ SSR： https://github.com/malaohu/ssr-with-net-speeder
 git clone https://github.com/malaohu/Arukas-API
 cd Arukas-API
 npm install
-node server.js token secret 1
+# modify config.js 
+node server.js
 ```
 然后访问：ip:13999 即可
 
