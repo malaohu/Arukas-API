@@ -84,7 +84,7 @@
 		});
 		$('.ssr_qr').each(function(i,obj){
 			$(obj).empty();
-            link = "ssr://" + btoa($(obj).attr('val')+btoa($(obj).attr('pwd')));
+            link = "ssr://" + btoa($(obj).attr('val')+btoa($(obj).attr('pwd')).replace(/=/g,"")).replace(/=/g,"");            
             $(obj).qrcode({ width: 350, height: 350, text:link});
             $("textarea[name='link_"+$(obj).attr("id")+"'").text(link);
 		});

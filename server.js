@@ -25,13 +25,16 @@ secret = config.secret;
 is_cron = config.is_cron;
 is_cache = config.cache;
 cache_timeout = config.cache_timeout;
+console.log('token: '+ token);
+console.log('secret: '+ secret);
+console.log('is_cron: '+ is_cron);
 
 var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?$/i
 
 app.get('/', function (req, res) {
     getit(appid, function (err, data) {
-        if (err || !data)
-            res.send('没有查询到数据。请检查node启动参数是否正确。更多内容请访问：https://github.com/malaohu/Arukas-API');
+        if (err || !data)            
+            res.send('没有查询到数据。请检查node启动参数是否正确。更多内容请访问：https://github.com/malaohu/Arukas-API' + token + secret + is_cron);
         else
             res.render('./index.html', { "data": data || [] });
     })
@@ -182,7 +185,7 @@ function get_ss_data(_appid, data, callback) {
         if (data[i].id == _appid || (_appid == 'all' && reg_images.test(data[i].attributes.image_name))) {
             var jn = data[i];
             if (!jn.attributes.port_mappings)
-                ontinue;
+                continue;
             for (var j = 0; j < jn.attributes.port_mappings.length; j++) {
                 var host = jn.attributes.port_mappings[j][0].host;
                 var ip = host.substring(6, host.indexOf(".")).replace(/-/g, ".");
