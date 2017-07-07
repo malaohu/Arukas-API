@@ -33,8 +33,8 @@ var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?
 
 app.get('/', function (req, res) {
     getit(appid, function (err, data) {
-        if (err || !data)
-            res.send('没有查询到数据。请检查node启动参数是否正确。更多内容请访问：https://github.com/malaohu/Arukas-API');
+        if (err || !data)            
+            res.send('没有查询到数据。请检查node启动参数是否正确。更多内容请访问：https://github.com/malaohu/Arukas-API' + token + secret + is_cron);
         else
             res.render('./index.html', { "data": data || [] });
     })
