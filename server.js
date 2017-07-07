@@ -25,6 +25,9 @@ secret = config.secret;
 is_cron = config.is_cron;
 is_cache = config.cache;
 cache_timeout = config.cache_timeout;
+console.log('token: '+ token);
+console.log('secret: '+ secret);
+console.log('is_cron: '+ is_cron);
 
 var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?$/i
 
