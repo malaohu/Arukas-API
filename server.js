@@ -13,7 +13,7 @@ app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 var args = process.argv.slice(2);
-var token = '', secret = '',is_croni,appid='all';
+var token = '', secret = '',is_cron,appid='all';
 
 
 //token = args[0];
@@ -182,7 +182,7 @@ function get_ss_data(_appid, data, callback) {
         if (data[i].id == _appid || (_appid == 'all' && reg_images.test(data[i].attributes.image_name))) {
             var jn = data[i];
             if (!jn.attributes.port_mappings)
-                ontinue;
+                continue;
             for (var j = 0; j < jn.attributes.port_mappings.length; j++) {
                 var host = jn.attributes.port_mappings[j][0].host;
                 var ip = host.substring(6, host.indexOf(".")).replace(/-/g, ".");
