@@ -11,9 +11,9 @@ RUN git clone https://github.com/woodsking2/Arukas-API.git /Arukas-API
 # ENV SECRET=
 
 WORKDIR /Arukas-API
-RUN sed -ri 's/yourtoken/'+$TOKEN+'/g' /Arukas-API/config.js && \
-    sed -ri 's/yoursecret/'+$SECRET+'/g' /Arukas-API/config.js && \
-    sed -ri 's/yourcron/'+$IS_CRON+'/g' /Arukas-API/config.js
+RUN sed -ri 's/yourtoken/'$TOKEN'/g' /Arukas-API/config.js && \
+    sed -ri 's/yoursecret/'$SECRET'/g' /Arukas-API/config.js && \
+    sed -ri 's/yourcron/'$IS_CRON'/g' /Arukas-API/config.js
 
 RUN npm install
 
