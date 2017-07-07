@@ -277,5 +277,8 @@ function bulid_base64(str)
 }
 
 app.listen(13999, function () {
-    console.log('Example app listening on port 13999')
+    console.log('Example app listening on port 13999');
+    console.log('token : ' + token);
+    console.log('secret : ' + secret);
+    console.log('is_cron : ' + is_cron);
 })
