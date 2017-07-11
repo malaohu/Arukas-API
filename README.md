@@ -1,6 +1,6 @@
 # 重要说明
 
-由于Arukas测试期延长至7月底，（http://51.ruyo.net/p/4331.html） 7月底将清理所有账户。
+由于Arukas测试期延长至7月底，（http://51.ruyo.net/p/4331.html ） 7月底将清理所有账户。
 
 本代码也停止更新了，等日后看 Arukas 的策略。
 
@@ -37,7 +37,7 @@ SSR： https://github.com/malaohu/ssr-with-net-speeder
 git clone https://github.com/malaohu/Arukas-API
 cd Arukas-API
 npm install
-# modify config.js 
+# 修改 config.js 填写你的token 和 secret
 node server.js
 ```
 然后访问：ip:13999 即可
@@ -61,10 +61,9 @@ docker run --name arukas-api -p 13999:13999 -e 'TOKEN=token' -e 'SECRET=secret' 
 ## 环境变量(ENV)
 TOKEN 和  SECRET 获取地址：https://app.arukas.io/settings/api-keys
 
-
 IS_CRON 传 0 或者 1
 是否启动自动启动服务功能，0是不启动，1是启动。
-该服务会定时检测APP运行状态，如果APP没有启动，会发送一个启动命令。
+该服务会每5分钟检测当前账户下所有APP运行状态，如果APP没有启动，会发送一个启动命令。
 
 
 ## 功能介绍
@@ -73,9 +72,9 @@ IS_CRON 传 0 或者 1
 
 ## 请求地址
 * http://ip:13999
-* http://ip:13999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令
-* http://ip:13999/ssr/subscribe/10 SSR订阅地址
-* http://ip:13999/install/deleteall/token 删除所有APP,必须携带token请求
+* http://ip:13999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令。
+* http://ip:13999/ssr/subscribe/10 SSR订阅地址。
+* http://ip:13999/install/deleteall/token 删除所有APP,必须携带token请求。
 * http://ip:13999/install/ssr/token 安装一个SSR,必须携带token请求，不支持自定义参数。如果创建失败请检查是不是APP达到创建上限。
 
 
