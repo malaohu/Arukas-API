@@ -6,9 +6,9 @@ RUN apt-get update
 RUN apt-get -y install git
 RUN git clone https://github.com/malaohu/Arukas-API.git /Arukas-API
 
-ENV IS_CRON= 1
-ENV TOKEN= 'token'
-ENV SECRET= 'secret'
+ENV IS_CRON='1'
+ENV TOKEN='token'
+ENV SECRET='secret'
 
 WORKDIR /Arukas-API
 RUN sed -ri 's/yourtoken/'$TOKEN'/g' /Arukas-API/config.js && \
