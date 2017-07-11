@@ -69,6 +69,8 @@ IS_CRON 传 0 或者 1
 * http://ip:13999
 * http://ip:13999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令
 * http://ip:13999/ssr/subscribe/10 SSR订阅地址
+* http://ip:13999/install/deleteall/token 删除所有APP,必须携带token请求
+* http://ip:13999/install/ssr/xxxxx 安装一个SSR,必须携带token请求，不支持自定义参数。如果创建失败请检查是不是APP达到创建上限。
 
 ## 可识别的SS(R)镜像
 
