@@ -1,10 +1,16 @@
 # 重要说明
 
-2017年7月6日提交的代码，不再支持 node server.js token secret 1 方式启动。
+由于Arukas测试期延长至7月底，（http://51.ruyo.net/p/4331.html） 7月底将清理所有账户。
 
-需要修改config.js配置文件，填写 token 和 secret
+本代码也停止更新了，等日后看 Arukas 的策略。
 
-已经兼容到最新版本的SSR订阅格式
+
+
+# 更新说明
+
+* 2017年7月11日：修复了Dockerfile,新增了新建SSR接口和删除所以APP接口。
+
+* 2017年7月6日：不再支持 node server.js token secret 1 方式启动。需要修改config.js配置文件，填写 token 和 secret。已经兼容到最新版本的SSR订阅格式。
 
 
 # 特别说明
