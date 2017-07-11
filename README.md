@@ -40,7 +40,8 @@ node server.js
 
 ## Docker部署
 ```
-docker run -d --name arukas-api -p 13999:13999 malaohu/arukas-api --env TOKEN=token SECRET=secret IS_CRON=1
+docker run --name arukas-api -p 13999:13999 -e 'TOKEN=token' -e 'SECRET=secret' -e 'IS_CRON=1' -d malaohu/arukas-api
+
 ```
 
 
