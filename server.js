@@ -39,7 +39,7 @@ app.get('/', function (req, res) {
 
 app.get('/:appid', function (req, res) {
     var _appid = req.params.appid;
-    get_app_info(_appid, function (err, data) {
+    get_containers_info(_appid, function (err, data) {
         if (!err)
             return get_ss_data(appid, [data], function (err, data) {
                 res.send(data);
@@ -56,6 +56,31 @@ app.get('/check/status', function (req, res) {
     })
 });
 
+//删除所有APP
+app.get('/install/deleteall/:token',function(req,res){
+    var _token = req.params.token;
+    if(_token != token)
+        return res.send('非法请求');
+    delete_all_app_info(function(){
+        return res.send('命令执行完毕');
+    })
+
+});
+
+//创建一个SSR
+app.get('/install/ssr/:token',function(req,res){
+    var _token = req.params.token;
+    console.log(_token);
+    if(_token != token)
+        return res.send('非法请求');
+    build_ssr_app(function(error,data){
+        console.log(data);
+        if(error)
+            return res.send('创建失败 ' + error);
+        else
+            return res.send('创建成功');
+    });
+})
 
 //获取SSR订阅地址
 //4.4.0+ 版本
@@ -88,7 +113,7 @@ if (is_cron == 1){
 }
 
 function getit(appid, callback) {
-    get_all_app_info(function (err, data) {
+    get_all_containers_info(function (err, data) {
         if (!err)
             return get_ss_data(appid, data, callback);
         else
@@ -97,7 +122,7 @@ function getit(appid, callback) {
 }
 
 //发送API请求
-function arukas_request(commond_url, methond, callback) {
+function arukas_request(commond_url, methond, data, callback) {
     commond_url = "https://app.arukas.io/api/" + commond_url;
     var _request = superagent.get;
     switch (methond) {
@@ -117,6 +142,7 @@ function arukas_request(commond_url, methond, callback) {
         .auth(token, secret, { type: 'auto' })
         .set('Content-Type', 'application/vnd.api+json')
         .set('Accept', 'application/vnd.api+json')
+        .send(data)
         .end(function (err, sres) {
             if(err)
                 return callback(err,null);
@@ -138,29 +164,46 @@ function getit_by_token(appid, callback) {
     });
 }
 
-function get_all_app_info(callback) {
+function get_all_app_info(callback){
+    arukas_request("app", "GET",'', function (err, body) {
+        return callback(err, body);
+    });
+}
+
+function delete_all_app_info(callback){
+    get_all_app_info(function(error,data){
+        async.each(data,function(jsn,cb){
+           send_delete_commond(jsn.id,function(){cb();});
+        },function(){
+            callback(); 
+        });
+    });
+}
+
+
+function get_all_containers_info(callback) {
     var _body = null;
     if(is_cache)
-        _body = cache.get('all_app_info');
+        _body = cache.get('all_containers_info');
     if(_body){
-        console.log('all_app_info get from cache');
+        console.log('all_containers_info get from cache');
         return callback(null, _body);
     }
     else
-        arukas_request("containers", "GET", function (err, body) {
+        arukas_request("containers", "GET",'', function (err, body) {
             //做缓存处理
             if(!err && is_cache){
-                cache.put('all_app_info', body, cache_timeout, function(key, value) {
+                cache.put('all_containers_info', body, cache_timeout, function(key, value) {
                     console.log('put cache key: ['+ key + '] value:' + value);
                 });
             }
-            console.log('all_app_info get from api');
+            console.log('all_containers_info get from api');
             return callback(err, body);
         })
 }
 
-function get_app_info(app_id, callback) {
-    arukas_request("containers", "GET", function (err, body) {
+function get_containers_info(app_id, callback) {
+    arukas_request("containers", "GET",'', function (err, body) {
         for (var i = 0; i < body.length; i++) {
             if (body[i].id == app_id)
                 return callback('', body[i])
@@ -172,8 +215,58 @@ function get_app_info(app_id, callback) {
 //发送启动命令
 function send_start_command(appid, callback) {
     var commond = 'containers/' + appid + '/power';
-    return arukas_request(commond, 'POST', callback);
+    return arukas_request(commond, 'POST','', callback);
 }
+
+//发送删除命令
+function send_remove_commond(app_id,callback){
+    var commond = 'app/' + app_id;
+    return arukas_request(commond, 'DELETE','', callback);
+}
+
+//发送创建命令
+function send_create_commond(data,callback){
+    var commond = 'app-sets'
+    return arukas_request(commond, 'POST',data, callback);
+}
+
+//创建一个SSR
+function build_ssr_app(callback){
+    var jsn = 
+    {
+        data:
+        [
+            {
+                "type": "containers",
+                "attributes": {
+                    "image_name": "malaohu/ssr-with-net-speeder",
+                    "instances": 1,
+                    "mem": 512,
+                    "cmd": "-s 0.0.0.0 -p 8989 -k RUYO.net -m rc4-md5 -o http_simple -O origin",
+                    "envs": [],
+                    "ports": [
+                        {
+                            "number": 8989,
+                            "protocol": "tcp"
+                        }
+                    ],
+                    "arukas_domain":"",
+
+                },
+            },
+            {
+                "type": "apps",
+                "attributes": {
+                    "name": "malaohu/ssr-with-net-speeder"
+                }
+            }
+        ]
+    };
+    send_create_commond(jsn,callback);
+
+}
+
+
 
 //处理结果信息
 function get_ss_data(_appid, data, callback) {
@@ -233,7 +326,7 @@ function build_ssh(obj){
 }
 
 function check_status(callback){
-    get_all_app_info(function (err, data) {
+    get_all_containers_info(function (err, data) {
         var log = ['开始检查APP运行情况 : ' + new Date()];
         async.eachSeries(data, function (_data, cb) {
             if (!_data.attributes.is_running) {
