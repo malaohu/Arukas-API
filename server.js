@@ -16,10 +16,6 @@ var args = process.argv.slice(2);
 var token = '', secret = '',is_cron,appid='all';
 
 
-//token = args[0];
-//secret = args[1];
-//is_cron = args[2] || 0;
-
 token = config.token;
 secret = config.secret;
 is_cron = config.is_cron;
@@ -27,6 +23,7 @@ is_cache = config.cache;
 cache_timeout = config.cache_timeout;
 
 var reg_images = /^[^\/]+\/(ssr?-with-net-speeder||shadowsocksr-docker)(:[^ ]+)?$/i
+var max_count = 3;
 
 app.get('/', function (req, res) {
     getit(appid, function (err, data) {
@@ -50,7 +47,10 @@ app.get('/:appid', function (req, res) {
 })
 
 //检查所有APP的状态，发现启动失败的，发送启动命令。
-app.get('/check/status', function (req, res) {
+app.get('/check/status/:token', function (req, res) {
+    var _token = req.params.token;
+    if(_token != token)
+        return res.send('非法请求');
     check_status(function(log){
         res.send('<pre><code>' +log.join('<br>')+'</code></pre>');
     })
@@ -70,11 +70,9 @@ app.get('/install/deleteall/:token',function(req,res){
 //创建一个SSR
 app.get('/install/ssr/:token',function(req,res){
     var _token = req.params.token;
-    console.log(_token);
     if(_token != token)
         return res.send('非法请求');
     build_ssr_app(function(error,data){
-        console.log(data);
         if(error)
             return res.send('创建失败 ' + error);
         else
@@ -104,7 +102,7 @@ app.get('/ssr/subscribe/:max',function(req,res){
 
 //启动服务监控每5分钟执行一次
 if (is_cron == 1){
-    new cronJob('*/5 * * * *', function () { 
+    new cronJob('*/2 * * * *', function () { 
         check_status(function(log){
             console.log(log);
         });
@@ -173,13 +171,17 @@ function get_all_app_info(callback){
 function delete_all_app_info(callback){
     get_all_app_info(function(error,data){
         async.each(data,function(jsn,cb){
-           send_delete_commond(jsn.id,function(){cb();});
+           send_remove_commond(jsn.id,function(){cb();});
         },function(){
             callback(); 
         });
     });
 }
 
+//删除App
+function delete_app_info(appid,callback){
+    send_remove_commond(appid,callback);
+}
 
 function get_all_containers_info(callback) {
     var _body = null;
@@ -220,7 +222,7 @@ function send_start_command(appid, callback) {
 
 //发送删除命令
 function send_remove_commond(app_id,callback){
-    var commond = 'app/' + app_id;
+    var commond = 'apps/' + app_id;
     return arukas_request(commond, 'DELETE','', callback);
 }
 
@@ -266,6 +268,35 @@ function build_ssr_app(callback){
 
 }
 
+function get_app_build_jsn(jsn){
+    var jsn = JSON.parse(JSON.stringify(jsn));
+    var new_jsn = 
+    {
+        data :
+        [
+            {
+                "type": jsn.type,
+                "attributes": {
+                    "image_name" : jsn.attributes.image_name,
+                    "instances": jsn.attributes.instances,
+                    "mem": jsn.attributes.mem,
+                    "envs": jsn.attributes.env,
+                    "ports": jsn.attributes.ports,
+                    "arukas_domain":""
+                }
+            },
+            {
+                 "type": "apps",
+                 "attributes": {
+                    "name": jsn.attributes.image_name
+                }
+            }
+
+        ]
+    }
+    
+    return new_jsn;
+}
 
 
 //处理结果信息
@@ -332,13 +363,42 @@ function check_status(callback){
             if (!_data.attributes.is_running) {
                 log.push('');
                 log.push('[' + _data.id + '] - 没有正常运行');
-                send_start_command(_data.id, function (err, body) {
-                    if (err)
-                        log.push('[' + _data.id + '] - 启动失败：' + err);
-                    else
-                        log.push('[' + _data.id + '] - 启动成功');
-                    cb(null);
-                });
+                var app_key = 'app'+ _data.attributes.app_id;
+                var count = cache.get(app_key) || 0;
+                count++;
+                console.log(app_key + ' ' + count);
+                //如果启动次数超过最大值,直接删除APP
+                if(count >= max_count)
+                {
+                    var jsn = get_app_build_jsn(_data);
+                    return delete_app_info(_data.attributes.app_id,function(err){
+                        send_create_commond(jsn,function(err){
+                            log.push('[' + _data.attributes.app_id + '] - 已经删除且重建');
+                            cb(null);
+                        });                
+                    })
+                }else{
+                    cache.put(app_key,count,(1000 * 60 * 60 * 2) , function(key, value) {
+                        console.log('put cache key: ['+ key + '] value:' + value);
+                    });
+                    send_start_command(_data.id, function (err, body) {
+                        //无法启动的APP,直接重建
+                        if(err &&  err == 'Error: Unprocessable Entity'){
+                            var jsn = get_app_build_jsn(_data);
+                            return delete_app_info(_data.attributes.app_id,function(err){
+                                send_create_commond(jsn,function(err){
+                                log.push('[' + _data.attributes.app_id + '] - 已经删除且重建');
+                                cb(null);
+                                });                
+                            })
+                        }
+                        if (err)
+                            log.push('[' + _data.attributes.app_id + '] - 启动失败：' + err);
+                        else
+                            log.push('[' + _data.attributes.app_id + '] - 启动命令已发送');
+                        cb(null);
+                    });
+                }
 
             } else
                 cb(null);
