@@ -163,7 +163,7 @@ function getit_by_token(appid, callback) {
 }
 
 function get_all_app_info(callback){
-    arukas_request("app", "GET",'', function (err, body) {
+    arukas_request("apps", "GET",'', function (err, body) {
         return callback(err, body);
     });
 }
@@ -171,7 +171,7 @@ function get_all_app_info(callback){
 function delete_all_app_info(callback){
     get_all_app_info(function(error,data){
         async.each(data,function(jsn,cb){
-           send_remove_commond(jsn.id,function(){cb();});
+           send_remove_commond(jsn.id,function(err){console.log(err);cb();});
         },function(){
             callback(); 
         });
