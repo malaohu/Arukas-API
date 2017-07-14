@@ -8,6 +8,8 @@
 
 # 更新说明
 
+* 2017年7月13日：支持删除重建APP，定时(2分钟一次)监测发现APP没有启动会发送启动命令，连续3次启动失败会删除重建。
+
 * 2017年7月11日：修复了Dockerfile,新增了新建SSR接口和删除所以APP接口。
 
 * 2017年7月6日：不再支持 node server.js token secret 1 方式启动。需要修改config.js配置文件，填写 token 和 secret。已经兼容到最新版本的SSR订阅格式。
@@ -54,7 +56,7 @@ docker run --name arukas-api -p 13999:13999 -e 'TOKEN=token' -e 'SECRET=secret' 
 ```
 镜像：malaohu/arukas-api
 端口:13999 TCP
-环境变量:TOKEN=token SECRET=secret IS_CRON=1
+环境变量(ENV):TOKEN=token SECRET=secret IS_CRON=1
 
 ```
 
@@ -72,10 +74,10 @@ IS_CRON 传 0 或者 1
 
 ## 请求地址
 * http://ip:13999
-* http://ip:13999/check/status 手动检查服务运行状态，没有启动服务，发送启动命令。
 * http://ip:13999/ssr/subscribe/10 SSR订阅地址。
+* http://ip:13999/check/status/token 手动检查服务运行状态，没有启动服务，发送启动命令。
 * http://ip:13999/install/deleteall/token 删除所有APP,必须携带token请求。
-* http://ip:13999/install/ssr/token 安装一个SSR,必须携带token请求，不支持自定义参数。如果创建失败请检查是不是APP达到创建上限。
+* http://ip:13999/install/ssr/token 部署一个SSR,必须携带token请求，不支持自定义参数。如果创建失败请检查是不是APP达到创建上限。
 
 
 ## 可识别的SS(R)镜像
